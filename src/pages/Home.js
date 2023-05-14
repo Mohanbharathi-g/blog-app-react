@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 // firebase
 import {
   collection,
@@ -12,19 +12,19 @@ import {
   orderBy,
   where,
   startAfter,
-} from "firebase/firestore";
-import { db } from "../firebase/firebase";
+} from 'firebase/firestore';
+import { db } from '../firebase/firebase';
 // components
-import BlogSection from "../components/BlogSection";
-import Spinner from "../components/Spinner";
-import Tags from "../components/Tags";
-import FeatureBlogs from "../components/FeatureBlogs";
-import Trending from "../components/Trending";
-import Category from "../components/Category";
-import Search from "../components/Search";
-import { isEmpty, isNull } from "lodash";
-import { toast } from "react-toastify";
-import Footer from "../components/Footer";
+import BlogSection from '../components/BlogSection';
+import Spinner from '../components/Spinner';
+import Tags from '../components/Tags';
+import FeatureBlogs from '../components/FeatureBlogs';
+import Trending from '../components/Trending';
+import Category from '../components/Category';
+import Search from '../components/Search';
+import { isEmpty, isNull } from 'lodash';
+import { toast } from 'react-toastify';
+import Footer from '../components/Footer';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -34,18 +34,21 @@ const Home = ({ setActive, user, active }) => {
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [tags, setTags] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [lastVisible, setLastVisible] = useState(null);
   const [trendBlogs, setTrendBlogs] = useState([]);
   const [totalBlogs, setTotalBlogs] = useState(null);
   const [hide, setHide] = useState(false);
   const queryString = useQuery();
-  const searchQuery = queryString.get("searchQuery");
+  const searchQuery = queryString.get('searchQuery');
   const location = useLocation();
 
   const getTrendingBlogs = async () => {
-    const blogRef = collection(db, "blogs");
-    const trendQuery = query(blogRef, where("trending", "==", "yes"));
+    const blogRef = collection(db, 'blogs');
+    console.log(blogRef);
+    const trendQuery = query(blogRef, where('trending', '==', 'yes'));
+
+    console.log(trendQuery);
     const querySnapshot = await getDocs(trendQuery);
     let trendBlogs = [];
     querySnapshot.forEach((doc) => {
@@ -56,21 +59,21 @@ const Home = ({ setActive, user, active }) => {
 
   useEffect(() => {
     getTrendingBlogs();
-    setSearch("");
+    setSearch('');
     const unsub = onSnapshot(
-      collection(db, "blogs"),
+      collection(db, 'blogs'),
       (snapshot) => {
         let list = [];
         let tags = [];
         snapshot.docs.forEach((doc) => {
-          tags.push(...doc.get("tags"));
+          tags.push(...doc.get('tags'));
           list.push({ id: doc.id, ...doc.data() });
         });
         const uniqueTags = [...new Set(tags)];
         setTags(uniqueTags);
         setTotalBlogs(list);
         setLoading(false);
-        setActive("home");
+        setActive('home');
       },
       (error) => {
         console.log(error);
@@ -89,8 +92,8 @@ const Home = ({ setActive, user, active }) => {
   }, [active]);
 
   const getBlogs = async () => {
-    const blogRef = collection(db, "blogs");
-    const firstFour = query(blogRef, orderBy("title"), limit(4));
+    const blogRef = collection(db, 'blogs');
+    const firstFour = query(blogRef, orderBy('title'), limit(4));
     const docSnapshot = await getDocs(firstFour);
     setBlogs(docSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     setLastVisible(docSnapshot.docs[docSnapshot.docs.length - 1]);
@@ -106,17 +109,17 @@ const Home = ({ setActive, user, active }) => {
       setBlogs((blogs) => [...blogs, ...blogsData]);
       setLastVisible(docSnapshot.docs[docSnapshot.docs.length - 1]);
     } else {
-      toast.info("No more blog to display");
+      toast.info('No more blog to display');
       setHide(true);
     }
   };
 
   const fetchMore = async () => {
     setLoading(true);
-    const blogRef = collection(db, "blogs");
+    const blogRef = collection(db, 'blogs');
     const nextFour = query(
       blogRef,
-      orderBy("title"),
+      orderBy('title'),
       limit(4),
       startAfter(lastVisible)
     );
@@ -127,11 +130,11 @@ const Home = ({ setActive, user, active }) => {
 
   // search
   const searchBlogs = async () => {
-    const blogRef = collection(db, "blogs");
-    const searchTitleQuery = query(blogRef, where("title", "==", searchQuery));
+    const blogRef = collection(db, 'blogs');
+    const searchTitleQuery = query(blogRef, where('title', '==', searchQuery));
     const searchTagQuery = query(
       blogRef,
-      where("tags", "array-contains", searchQuery)
+      where('tags', 'array-contains', searchQuery)
     );
     const titleSnapshot = await getDocs(searchTitleQuery);
     const tagSnapshot = await getDocs(searchTagQuery);
@@ -147,7 +150,7 @@ const Home = ({ setActive, user, active }) => {
     const combinedSearchBlogs = searchTitleBlogs.concat(searchTagBlogs);
     setBlogs(combinedSearchBlogs);
     setHide(true);
-    setActive("");
+    setActive('');
   };
 
   useEffect(() => {
@@ -163,11 +166,11 @@ const Home = ({ setActive, user, active }) => {
 
   // delete
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you wanted to delete this blog ?")) {
+    if (window.confirm('Are you sure you wanted to delete this blog ?')) {
       try {
         setLoading(true);
-        await deleteDoc(doc(db, "blogs", id));
-        toast.success("Blog deleted successfully");
+        await deleteDoc(doc(db, 'blogs', id));
+        toast.success('Blog deleted successfully');
         setLoading(false);
       } catch (err) {
         console.log(err);
@@ -178,7 +181,7 @@ const Home = ({ setActive, user, active }) => {
   const handleChange = (e) => {
     const { value } = e.target;
     if (isEmpty(value)) {
-      console.log("test");
+      console.log('test');
       getBlogs();
       setHide(false);
     }
@@ -205,18 +208,18 @@ const Home = ({ setActive, user, active }) => {
 
   return (
     <>
-      <div className="container-fluid pb-4 pt-4 padding">
-        <div className="container padding">
-          <div className="row mx-0">
+      <div className='container-fluid pb-4 pt-4 padding'>
+        <div className='container padding'>
+          <div className='row mx-0'>
             <Trending blogs={trendBlogs} />
-            <div className="col-md-8">
-              <div className="blog-heading text-start py-2 mb-4">
+            <div className='col-md-8'>
+              <div className='blog-heading text-start py-2 mb-4'>
                 Daily Blogs
               </div>
-              {blogs.length === 0 && location.pathname !== "/" && (
+              {blogs.length === 0 && location.pathname !== '/' && (
                 <>
                   <h4>
-                    No Blog found with search keyword:{" "}
+                    No Blog found with search keyword:{' '}
                     <strong>{searchQuery}</strong>
                   </h4>
                 </>
@@ -231,16 +234,16 @@ const Home = ({ setActive, user, active }) => {
               ))}
 
               {!hide && (
-                <button className="btn btn-primary" onClick={fetchMore}>
+                <button className='btn btn-primary' onClick={fetchMore}>
                   Load More
                 </button>
               )}
             </div>
-            <div className="col-md-3">
+            <div className='col-md-3'>
               <Search search={search} handleChange={handleChange} />
-              <div className="blog-heading text-start py-2 mb-4">Tags</div>
+              <div className='blog-heading text-start py-2 mb-4'>Tags</div>
               <Tags tags={tags} />
-              <FeatureBlogs title={"Most Popular"} blogs={blogs} />
+              <FeatureBlogs title={'Most Popular'} blogs={blogs} />
               <Category catgBlogsCount={categoryCount} />
             </div>
           </div>
